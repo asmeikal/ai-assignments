@@ -105,7 +105,7 @@ class WumpusWorld(object):
     def __str__(self):
         res = "Points: {}\n".format(self.points)
         if self.fired_arrow:
-            res += "You have fired your arrow."
+            res += "You have fired your arrow.\n"
         else:
             res += "You have an arrow.\n"
         if self.gold_position == None:
@@ -168,13 +168,13 @@ class WumpusWorld(object):
 
     def TurnLeft(self):
         self.percepts['scream'] = False
-        self.percepts['bump'] = False        
+        self.percepts['bump'] = False
         print("You turn left.")
         self.player_orientation = turn_left(self.player_orientation)
 
     def TurnRight(self):
         self.percepts['scream'] = False
-        self.percepts['bump'] = False        
+        self.percepts['bump'] = False
         print("You turn right.")
         self.player_orientation = turn_right(self.player_orientation)
 
@@ -183,7 +183,7 @@ class WumpusWorld(object):
         return self.percepts
 
     def FireArrow(self):
-        self.percepts['bump'] = False        
+        self.percepts['bump'] = False
         self.percepts['scream'] = False
         if self.fired_arrow:
             print("You have no more arrows to fire.")
@@ -204,7 +204,7 @@ class WumpusWorld(object):
 
     def Exit(self):
         self.percepts['scream'] = False
-        self.percepts['bump'] = False        
+        self.percepts['bump'] = False
         if (0,0) != self.player_pos:
             print("You can't exit from here.")
         else:
@@ -213,7 +213,7 @@ class WumpusWorld(object):
 
     def PickUp(self):
         self.percepts['scream'] = False
-        self.percepts['bump'] = False        
+        self.percepts['bump'] = False
         x, y = self.player_pos
         if (x, y) == self.gold_position:
             self.points += 1000
@@ -245,30 +245,29 @@ def print_help():
     print("'{}' to quit.".format(quit))
 
 def exec_action(world, action):
-    action = action.upper()
-    for a in action:
-        if a == help_d:
-            print_help()
-        elif a == move:
-            world.Move()
-        elif a == fire:
-            world.FireArrow()
-        elif a == left:
-            world.TurnLeft()
-        elif a == right:
-            world.TurnRight()
-        elif a == pickup:
-            world.PickUp()
-        elif a == quit:
-            print("Bye!")
-            sys.exit(0)
-        elif a == exit:
-            world.Exit()
-        elif a == cheat:
-            print(world)
-        else:
-            print("Sorry, I don't understand action '{}'.".format(action))
-            print_help()
+    a = action.upper()
+    if a == help_d:
+        print_help()
+    elif a == move:
+        world.Move()
+    elif a == fire:
+        world.FireArrow()
+    elif a == left:
+        world.TurnLeft()
+    elif a == right:
+        world.TurnRight()
+    elif a == pickup:
+        world.PickUp()
+    elif a == quit:
+        print("Bye!")
+        sys.exit(0)
+    elif a == exit:
+        world.Exit()
+    elif a == cheat:
+        print(world)
+    else:
+        print("Sorry, I don't understand action '{}'.".format(action))
+        print_help()
 
 if __name__ == '__main__':
     print()
