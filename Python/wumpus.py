@@ -6,11 +6,10 @@ wumpus = 'W'
 pit    = '_'
 gold   = 'G'
 
-def get_input(s):
-    if sys.version_info >= (3, 0):
-        return input(s)
-    else:
-        return raw_input(s)
+if sys.version_info >= (3, 0):
+    get_input = input
+else:
+    get_input = raw_input
 
 def inside_board(x, y, size):
     return x >= 0 and y >= 0 and x < size and y < size
@@ -25,6 +24,14 @@ def random_square(size):
     return (random.randint(0, size-1), random.randint(0, size-1))
 
 def random_empty_square(board):
+    free = False
+    for k1 in range(len(board)):
+        for k2 in range(len(board[k1])):
+            if board[k1][k2] == None:
+                free = True
+                break
+    if not free:
+        raise RuntimeError("The board is full.")
     i, j = random_square(len(board))
     while board[i][j] != None:
         i, j = random_square(len(board))
@@ -80,7 +87,7 @@ def turn_left(o):
 
 
 class WumpusWorld(object):
-    def __init__(self):
+    def __init__(self, size, n_pits):
         self.percepts = {
             'exit': False,
             'bump': False,
@@ -89,7 +96,7 @@ class WumpusWorld(object):
             'breeze': False,
             'scream': False,
         }
-        self.size = 4
+        self.size = size
         self.board = generate_board(self.size)
         self.board[0][0] = player
         self.points = 0
@@ -98,7 +105,7 @@ class WumpusWorld(object):
         self.player_pos = (0,0)
         self.player_orientation = (0,1)
         place_character(self.board, wumpus)
-        for _ in range(self.size):
+        for _ in range(n_pits):
             place_character(self.board, pit)
         self.gold_position = random_empty_square(self.board)
 
@@ -211,6 +218,9 @@ class WumpusWorld(object):
             print("You exit the world of Wumpus.")
             self.finished = True
 
+    def Print(self):
+        print(self)
+
     def PickUp(self):
         self.percepts['scream'] = False
         self.percepts['bump'] = False
@@ -244,30 +254,28 @@ def print_help():
     print("'{}' to cheat.".format(cheat))
     print("'{}' to quit.".format(quit))
 
+def quit_wumpus():
+    print("Bye!")
+    sys.exit(0)
+
 def exec_action(world, action):
+    actions = {
+            help_d : print_help,
+            move   : world.Move,
+            fire   : world.FireArrow,
+            left   : world.TurnLeft,
+            right  : world.TurnRight,
+            pickup : world.PickUp,
+            quit   : quit_wumpus,
+            exit   : world.Exit,
+            cheat  : world.Print,
+        }
     a = action.upper()
-    if a == help_d:
-        print_help()
-    elif a == move:
-        world.Move()
-    elif a == fire:
-        world.FireArrow()
-    elif a == left:
-        world.TurnLeft()
-    elif a == right:
-        world.TurnRight()
-    elif a == pickup:
-        world.PickUp()
-    elif a == quit:
-        print("Bye!")
-        sys.exit(0)
-    elif a == exit:
-        world.Exit()
-    elif a == cheat:
-        print(world)
-    else:
+    if a not in actions:
         print("Sorry, I don't understand action '{}'.".format(action))
         print_help()
+    else:
+        actions[a]()
 
 if __name__ == '__main__':
     print()
@@ -284,9 +292,10 @@ if __name__ == '__main__':
     print()
     print("You are facing east. Don't get lost.")
     print()
-    world = WumpusWorld()
+    world = WumpusWorld(4, 3)
     while not world.Finished():
         print(print_percepts(world.Percepts()))
         action = get_input("What do you do? ")
         exec_action(world, action)
     print("You made {} points.".format(world.points))
+
